@@ -257,3 +257,55 @@ Coloque oito rainhas em um tabuleiro de
   diagonais do tabuleiro.
 
 Implemente um agente usando a biblioteca `aigyminsper` que resolve este problema.
+
+Implementacao (versao nova): `torres_hanoi.py`.
+
+Representacao de estado (o que e relevante):
+
+- conteudo dos tres pinos A, B e C.
+- ordem dos discos em cada pino (nunca pode ter disco maior sobre menor).
+- pino objetivo (neste caso, C).
+
+Estrutura adotada no codigo:
+
+- `pegs`: tupla com 3 tuplas, uma para cada pino.
+- cada pino guarda discos do maior para o menor, e o topo e o ultimo elemento.
+
+Estado inicial e final:
+
+- inicial: todos os discos em A, B vazio, C vazio.
+- final: todos os discos em C.
+
+Operacoes sobre estado:
+
+- mover disco do topo de um pino origem para um pino destino.
+- condicoes para ser valida:
+  - origem nao vazia;
+  - destino vazio ou topo do destino maior que disco movido.
+
+Estimativa do espaco de busca:
+
+- numero de configuracoes validas cresce exponencialmente com n.
+- numero minimo de movimentos para solucao otima e `2^n - 1`.
+
+Busca cega resolve sempre?
+
+- para n pequeno, sim.
+- para n grande, pode ficar inviavel por crescimento exponencial.
+
+Heuristica recomendada:
+
+- quantidade de discos ainda fora do pino objetivo (usada no arquivo novo para gulosa/A*).
+
+Execucao:
+
+```bash
+# largura (otimo para custo unitario)
+python torres_hanoi.py --disks 4 --algoritmo largura
+
+# profundidade com limite automatico (2^n - 1)
+python torres_hanoi.py --disks 5 --algoritmo profundidade
+
+# A* com poda geral
+python torres_hanoi.py --disks 6 --algoritmo a_estrela --pruning general
+```
