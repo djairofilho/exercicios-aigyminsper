@@ -78,6 +78,14 @@ Execucao:
 python cavalo_xadrez.py --algoritmo profundidade
 ```
 
+Parametros disponiveis:
+
+- `--algoritmo`: `largura`, `profundidade`, `profundidade_iterativa`, `custo_uniforme`, `gulosa`, `a_estrela`.
+- `--pruning`: `without`, `father-son`, `general`.
+- `--warnsdorff`: ativa heuristica de grau de Warnsdorff para ordenar sucessores.
+- `--trace`: mostra trace textual no terminal (expansao e geracao de sucessores).
+- `--board-size`: define o tamanho do tabuleiro NxN (padrao: 8).
+
 Outras opcoes de algoritmo:
 
 ```bash
@@ -93,6 +101,19 @@ Tipo de poda (opcional):
 
 ```bash
 python cavalo_xadrez.py --algoritmo profundidade --pruning general
+```
+
+Exemplos combinando parametros:
+
+```bash
+# Mais rapido em grade menor
+python cavalo_xadrez.py --algoritmo profundidade --warnsdorff --board-size 6
+
+# Trace textual no terminal
+python cavalo_xadrez.py --algoritmo profundidade --warnsdorff --trace
+
+# Busca A* com poda geral
+python cavalo_xadrez.py --algoritmo a_estrela --pruning general --board-size 8
 ```
 
 Observacao: para o problema do cavalo em 8x8, buscas cegas podem demorar bastante.

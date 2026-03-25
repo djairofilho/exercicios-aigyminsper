@@ -15,7 +15,11 @@ from aigyminsper.search.search_algorithms import (
 
 
 class MyAgent(State):
-    """Passeio do cavalo 8x8 no formato simples do User Guide."""
+    """Passeio do cavalo em tabuleiro NxN no formato simples do User Guide."""
+
+    TRACE_ENABLED: bool = False
+    TRACE_COUNT: int = 0
+    TRACE_MAX_LINES: int = 2000
 
     KNIGHT_DELTAS: tuple[tuple[int, int], ...] = (
         (-2, -1),
@@ -53,6 +57,13 @@ class MyAgent(State):
     def successors(self) -> list[MyAgent]:
         successors: list[MyAgent] = []
 
+        if self.TRACE_ENABLED and self.TRACE_COUNT < self.TRACE_MAX_LINES:
+            print(
+                f"Expandindo estado: pos=({self.row},{self.col}) "
+                f"visitadas={len(self.visited)}"
+            )
+            MyAgent.TRACE_COUNT += 1
+
         if self.returned_to_start:
             return successors
 
@@ -81,6 +92,12 @@ class MyAgent(State):
                 )
 
             for new_row, new_col in candidates:
+                if self.TRACE_ENABLED and self.TRACE_COUNT < self.TRACE_MAX_LINES:
+                    print(
+                        f"  -> gera sucessor ({new_row},{new_col}) "
+                        f"(visitadas={len(self.visited) + 1})"
+                    )
+                    MyAgent.TRACE_COUNT += 1
 
                 successors.append(
                     MyAgent(
@@ -104,6 +121,9 @@ class MyAgent(State):
             if not (0 <= new_row < self.board_size and 0 <= new_col < self.board_size):
                 continue
             if (new_row, new_col) == (self.start_row, self.start_col):
+                if self.TRACE_ENABLED and self.TRACE_COUNT < self.TRACE_MAX_LINES:
+                    print("  -> gera retorno ao inicio")
+                    MyAgent.TRACE_COUNT += 1
                 successors.append(
                     MyAgent(
                         op="retorna_inicio",
@@ -127,7 +147,10 @@ class MyAgent(State):
         )
 
     def description(self) -> str:
-        return "Passeio do cavalo 8x8: visitar todas as casas e retornar ao inicio"
+        return (
+            f"Passeio do cavalo {self.board_size}x{self.board_size}: "
+            "visitar todas as casas e retornar ao inicio"
+        )
 
     def cost(self) -> int:
         return 1
@@ -174,8 +197,20 @@ def build_algorithm(name: str):
     raise ValueError(f"Algoritmo desconhecido: {name}")
 
 
+def print_solution_steps(path: str) -> None:
+    raw_steps = [step.strip() for step in path.split(";")]
+    steps = [step for step in raw_steps if step]
+
+    if not steps:
+        return
+
+    print("\nPasso a passo da solucao:")
+    for index, step in enumerate(steps, start=1):
+        print(f"{index:02d}: {step}")
+
+
 def main() -> None:
-    parser = argparse.ArgumentParser(description="Passeio do cavalo 8x8 com aigyminsper")
+    parser = argparse.ArgumentParser(description="Passeio do cavalo NxN com aigyminsper")
     parser.add_argument(
         "--algoritmo",
         choices=[
@@ -200,26 +235,65 @@ def main() -> None:
         action="store_true",
         help="Ativa heuristica de grau de Warnsdorff para ordenar sucessores",
     )
+    parser.add_argument(
+        "--trace",
+        action="store_true",
+        help="Mostra no terminal trace textual dos passos expandidos",
+    )
+    parser.add_argument(
+        "--board-size",
+        type=int,
+        default=8,
+        help="Tamanho do tabuleiro NxN (ex.: 5, 6, 8)",
+    )
     args = parser.parse_args()
 
-    initial_state = MyAgent(op="", use_warnsdorff=args.warnsdorff)
+    if args.board_size < 1:
+        raise ValueError("--board-size deve ser >= 1")
+
+    initial_state = MyAgent(
+        op="",
+        board_size=args.board_size,
+        use_warnsdorff=args.warnsdorff,
+    )
+    MyAgent.TRACE_ENABLED = args.trace
+    MyAgent.TRACE_COUNT = 0
     algorithm, needs_depth_limit, class_name = build_algorithm(args.algoritmo)
 
     print(f"\nExecutando: {args.algoritmo} ({class_name})")
+    print(f"Tabuleiro: {args.board_size}x{args.board_size}")
     print(f"Warnsdorff: {'ativo' if args.warnsdorff else 'inativo'}")
     started = time.perf_counter()
 
     if needs_depth_limit:
-        # m=64: 63 movimentos para visitar as outras casas + 1 para retornar.
-        result = algorithm.search(initial_state, m=64, pruning=args.pruning)
+        # m = N*N: (N*N - 1) movimentos de visita + 1 movimento de retorno.
+        depth_limit = args.board_size * args.board_size
+        result = algorithm.search(
+            initial_state,
+            m=depth_limit,
+            pruning=args.pruning,
+            trace=False,
+        )
     else:
-        result = algorithm.search(initial_state, pruning=args.pruning)
+        result = algorithm.search(
+            initial_state,
+            pruning=args.pruning,
+            trace=False,
+        )
+
+    if args.trace and MyAgent.TRACE_COUNT >= MyAgent.TRACE_MAX_LINES:
+        print(
+            f"[trace interrompido apos {MyAgent.TRACE_MAX_LINES} linhas "
+            "para evitar excesso de saida]"
+        )
 
     elapsed = time.perf_counter() - started
 
     if result is not None:
         print("Achou!")
-        print(result.show_path())
+        path = result.show_path()
+        print(path)
+        print_solution_steps(path)
         print(f"Custo total: {result.g}")
         print(f"Tempo: {elapsed:.2f}s")
     else:
