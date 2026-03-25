@@ -144,6 +144,60 @@ E as dimensões da casa são de $10 \times 10$ quartos.
 
 Implemente um agente usando a biblioteca aigyminsper que resolve este problema.
 
+Implementacao (versao nova): `aspirador_po_10x10.py`.
+
+Representacao de estado (o que e relevante):
+
+- posicao do robo: `(linha, coluna)`.
+- orientacao do robo: `N`, `L`, `S`, `O`.
+- mapa de sujeira: grade `10x10` com `1=sujo` e `0=limpo`.
+
+Estrutura adotada no codigo:
+
+- `row`, `col`: coordenadas atuais do robo.
+- `direction`: direcao atual (indice em `N/L/S/O`).
+- `grid`: matriz imutavel (tupla de tuplas) representando sujeira.
+
+Estado inicial e final:
+
+- inicial: robo em `(0,0)`, orientado para leste (`L`), e grade conforme configuracao (`sample` ou `all_dirty`).
+- final: todos os quartos limpos (nenhum `1` na grade).
+
+Operacoes sobre estado:
+
+- `virar_esquerda`: muda orientacao para 90 graus a esquerda.
+- `virar_direita`: muda orientacao para 90 graus a direita.
+- `ir_frente`: avanca 1 casa na orientacao atual, somente se a proxima casa estiver dentro da grade.
+- `limpar`: limpa a casa atual, somente se ela estiver suja.
+
+Estimativa do espaco de busca:
+
+- posicoes: `10 * 10 = 100`.
+- orientacoes: `4`.
+- configuracoes de sujeira: `2^(10*10) = 2^100`.
+- total aproximado de estados: `100 * 4 * 2^100 = 400 * 2^100`.
+
+Busca cega resolve sempre?
+
+- em teoria, pode resolver (estado finito).
+- na pratica, para `10x10` completo, busca cega tende a ser inviavel por explosao combinatoria.
+
+Heuristicas recomendadas:
+
+- quantidade de quartos sujos restantes.
+- distancia Manhattan ate o quarto sujo mais proximo.
+- combinacao das duas (usada no arquivo novo), para guiar busca gulosa ou A*.
+
+Execucao:
+
+```bash
+# teste rapido (sujeira amostrada)
+python aspirador_po_10x10.py --algoritmo gulosa --size 10 --mode sample
+
+# cenario mais pesado (todos sujos)
+python aspirador_po_10x10.py --algoritmo a_estrela --size 10 --mode all_dirty
+```
+
 ## Conjectura de Knuth
 
 O cientista da computação Donal Knuth em 1964 conjecturou que **todo** número inteiro positivo pode ser gerado a partir do número **4** aplicando-se uma combinação de:
