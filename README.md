@@ -239,28 +239,19 @@ Considere o problema das Torres de Hanói com n discos e 3 postes (A, B e C), on
 
 Implemente um agente usando a biblioteca `aigyminsper` que resolve este problema.
 
-## Problema do quebra-cabeça de 8 peças
+Implementacoes:
 
-O quebra-cabeça de 8 peças é um quebra-cabeça deslizante que consiste em um tabuleiro de 3x3 com 8 peças numeradas de 1 a 8 e um espaço vazio. O objetivo do quebra-cabeça é mover as peças para que elas estejam ordenadas de forma crescente, com o espaço vazio na posição inferior direita.
+- `torres_hanoi.py`: versao com aigyminsper (busca em espaco de estados).
+- `torres_hanoi_classic.py`: versao classica em Python puro (recursao/backtracking).
 
-1. Descreva como você representaria o espaço de busca para esse problema, incluindo a representação do estado inicial e do estado objetivo.
-1. Que algoritmo de busca você usaria para resolver esse problema? Explique por que você escolheu esse algoritmo.
-1. É necessário algum tipo de heurística? Se sim, qual heurística você usaria e por quê? 
+Como definir a versao classica?
 
-Implemente um agente usando a biblioteca `aigyminsper` que resolve este problema.
+- Ela se comporta como uma DFS recursiva deterministica.
+- A recursao desce no subproblema `n-1`, faz um movimento do disco `n`, e depois resolve o outro subproblema `n-1`.
+- E chamada de backtracking implicito porque a propria pilha de chamadas controla descida e retorno.
+- Diferente de uma busca cega generica, essa estrategia ja segue a regra matematica otima.
 
-## As 8 rainhas
-
-Coloque oito rainhas em um tabuleiro de
-  xadrez (`8x8` casas) de maneira que nenhuma rainha ameace
-  outra, i.e., as rainhas não devem compartilhar colunas, linhas ou
-  diagonais do tabuleiro.
-
-Implemente um agente usando a biblioteca `aigyminsper` que resolve este problema.
-
-Implementacao (versao nova): `torres_hanoi.py`.
-
-Representacao de estado (o que e relevante):
+Representacao de estado (versao aigyminsper):
 
 - conteudo dos tres pinos A, B e C.
 - ordem dos discos em cada pino (nunca pode ter disco maior sobre menor).
@@ -268,7 +259,7 @@ Representacao de estado (o que e relevante):
 
 Estrutura adotada no codigo:
 
-- `pegs`: tupla com 3 tuplas, uma para cada pino.
+- `pinos`: tupla com 3 tuplas, uma para cada pino.
 - cada pino guarda discos do maior para o menor, e o topo e o ultimo elemento.
 
 Estado inicial e final:
@@ -293,19 +284,38 @@ Busca cega resolve sempre?
 - para n pequeno, sim.
 - para n grande, pode ficar inviavel por crescimento exponencial.
 
-Heuristica recomendada:
+Heuristica recomendada (versao aigyminsper):
 
-- quantidade de discos ainda fora do pino objetivo (usada no arquivo novo para gulosa/A*).
+- quantidade de discos ainda fora do pino objetivo (usada para gulosa/A*).
 
 Execucao:
 
 ```bash
-# largura (otimo para custo unitario)
+# aigyminsper: largura (otimo para custo unitario)
 python torres_hanoi.py --disks 4 --algoritmo largura
 
-# profundidade com limite automatico (2^n - 1)
-python torres_hanoi.py --disks 5 --algoritmo profundidade
-
-# A* com poda geral
+# aigyminsper: A* com poda geral
 python torres_hanoi.py --disks 6 --algoritmo a_estrela --pruning general
+
+# classico: recursao/backtracking puro
+python torres_hanoi_classic.py --disks 4 --show-steps
 ```
+
+## Problema do quebra-cabeça de 8 peças
+
+O quebra-cabeça de 8 peças é um quebra-cabeça deslizante que consiste em um tabuleiro de 3x3 com 8 peças numeradas de 1 a 8 e um espaço vazio. O objetivo do quebra-cabeça é mover as peças para que elas estejam ordenadas de forma crescente, com o espaço vazio na posição inferior direita.
+
+1. Descreva como você representaria o espaço de busca para esse problema, incluindo a representação do estado inicial e do estado objetivo.
+1. Que algoritmo de busca você usaria para resolver esse problema? Explique por que você escolheu esse algoritmo.
+1. É necessário algum tipo de heurística? Se sim, qual heurística você usaria e por quê? 
+
+Implemente um agente usando a biblioteca `aigyminsper` que resolve este problema.
+
+## As 8 rainhas
+
+Coloque oito rainhas em um tabuleiro de
+  xadrez (`8x8` casas) de maneira que nenhuma rainha ameace
+  outra, i.e., as rainhas não devem compartilhar colunas, linhas ou
+  diagonais do tabuleiro.
+
+Implemente um agente usando a biblioteca `aigyminsper` que resolve este problema.
