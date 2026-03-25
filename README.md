@@ -319,3 +319,43 @@ Coloque oito rainhas em um tabuleiro de
   diagonais do tabuleiro.
 
 Implemente um agente usando a biblioteca `aigyminsper` que resolve este problema.
+
+Implementacao (versao nova): `oito_rainhas.py`.
+
+Representacao de estado (o que e relevante):
+
+- uma rainha por linha.
+- para cada linha, guardar em qual coluna a rainha foi colocada.
+- estado parcial: primeiras k linhas ja preenchidas sem conflitos.
+
+Estrutura adotada no codigo:
+
+- `cols`: tupla em que `cols[i]` e a coluna da rainha da linha `i`.
+- exemplo: `cols = (0, 4, 7)` significa rainhas em `(0,0)`, `(1,4)`, `(2,7)`.
+
+Estado inicial e final:
+
+- inicial: `cols = ()` (nenhuma rainha colocada).
+- final: `len(cols) == 8` sem conflitos de coluna/diagonal.
+
+Sucessores:
+
+- escolhe a proxima linha `next_row = len(cols)`.
+- tenta cada coluna `0..7`.
+- adiciona sucessor apenas se nao houver conflito:
+  - mesma coluna;
+  - mesma diagonal (`abs(dr) == abs(dc)`).
+
+Heuristica usada (gulosa/A*):
+
+- numero de rainhas que faltam posicionar: `h = N - len(cols)`.
+
+Execucao:
+
+```bash
+# busca em profundidade (recomendado para este modelamento)
+python oito_rainhas.py --algoritmo profundidade --size 8
+
+# A* com poda geral
+python oito_rainhas.py --algoritmo a_estrela --size 8 --pruning general
+```
