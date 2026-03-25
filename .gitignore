@@ -1,0 +1,26 @@
+# Python cache and bytecode
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Distribution / packaging
+build/
+dist/
+*.egg-info/
+
+# Test and coverage output
+.pytest_cache/
+.coverage
+htmlcov/
+
+# VS Code
+.vscode/
+
+# OS files
+.DS_Store
+Thumbs.db
